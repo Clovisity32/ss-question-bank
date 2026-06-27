@@ -82,11 +82,16 @@ it). It lets you add papers without running Python:
    on this repo (<https://github.com/settings/personal-access-tokens>), paste it into _Publish settings_,
    and click **Save token**. The token stays in your browser only — it is the publish lock, so **only you**
    (the token holder) can add questions. Students who open the page can't publish.
-3. Choose one or more `.docx` papers. They are parsed **on your device** (the file is never uploaded);
-   the same Q6/Q7 detection + classification as the Python pipeline runs in the browser.
-4. Review the detected questions (fix any category / Issue·Chapter), then **Publish to live site**.
-   This commits the merged `questions.json` to the repo; the Pages workflow redeploys and students see the
-   new questions within ~1 minute. Questions are merged by id, so re-uploading a paper updates it in place.
+3. **Upload (multiple at once):** choose one or more `.docx` papers. They are parsed **on your device**
+   (files never leave your computer); the same Q6/Q7 detection + classification as the Python pipeline runs
+   in the browser. The school is read from the paper header.
+4. **Edit anything before publishing:** each detected question is fully editable — Q-type (Q6/Q7), category
+   or Issue·Chapter, school, year, exam/paper, Q-number, marks, and the context / question text. Use
+   **Remove** to drop a question you don't want. Then **Publish to live site** (merged by id, so
+   re-uploading a paper updates it in place); students see changes within ~1 minute.
+5. **Manage published questions (section 3):** click **Load published bank** to pull what's currently live,
+   then edit any field or **Delete** wrongly-parsed entries, and **Save changes**. This is how you fix or
+   remove something after it's already been published.
 
 > The in-browser extractor (`site/extract-core.js`) is a direct port of the Python pipeline and uses the
 > same rules, exported to `site/data/classify-config.json` by `extract.py`.

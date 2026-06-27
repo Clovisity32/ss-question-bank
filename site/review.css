@@ -129,6 +129,45 @@
   border-color: var(--accent);
   color: var(--accent);
 }
+.btn-ghost.danger {
+  margin-left: auto;
+  padding: 5px 12px;
+}
+.btn-ghost.danger:hover {
+  border-color: #c0392b;
+  color: #c0392b;
+}
+.rev-controls label.inline {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+.rev-top label.inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.rev-card label.full {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+.rev-card textarea {
+  font: inherit;
+  font-size: 14px;
+  padding: 7px 9px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  resize: vertical;
+  width: 100%;
+}
 .rev-stem {
   margin: 0;
   font-weight: 500;

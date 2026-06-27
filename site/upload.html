@@ -3,29 +3,29 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Upload Paper — SS Question Bank</title>
+    <title>Admin — SS Question Bank</title>
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="review.css" />
   </head>
   <body class="review-body">
     <header class="review-header">
       <div>
-        <h1>Upload a Paper</h1>
+        <h1>Question Bank Admin</h1>
         <p class="muted">
-          Pick a <code>.docx</code> prelim paper. It is parsed
-          <strong>on this device</strong> — the file is never uploaded anywhere.
-          Review the detected Q6/Q7, then publish to the live site.
+          Upload &amp; classify papers on this device, edit anything, then
+          publish. You can also manage (edit / delete) questions already on the
+          live site.
         </p>
       </div>
       <a class="admin-link" href="index.html">← Back to bank</a>
     </header>
 
-    <!-- Step 1: publish settings (token) -->
+    <!-- Publish settings (token) -->
     <section class="up-box">
       <h2>1. Publish settings <span id="tokenState" class="muted"></span></h2>
       <p class="muted">
-        Publishing writes to your GitHub repo, so only you (with the token) can
-        add questions. The token is stored only in this browser. Create a
+        Publishing/editing writes to your GitHub repo, so only you (with the
+        token) can change the bank. The token stays in this browser. Create a
         fine-grained token with <strong>Contents: Read &amp; write</strong> on
         this repo at
         <a
@@ -62,24 +62,45 @@
       </div>
     </section>
 
-    <!-- Step 2: choose file -->
+    <!-- Upload -->
     <section class="up-box">
-      <h2>2. Choose paper(s)</h2>
+      <h2>2. Upload paper(s)</h2>
+      <p class="muted">
+        Pick one or more <code>.docx</code> papers (parsed on-device). Review
+        and edit every field, remove any you don't want, then publish.
+      </p>
       <input type="file" id="file" accept=".docx" multiple />
       <p id="parseStatus" class="muted"></p>
-    </section>
-
-    <!-- Step 3: review -->
-    <section class="up-box" id="reviewSection" hidden>
-      <h2>3. Review detected questions</h2>
-      <main id="rows" class="review-rows"></main>
-      <div class="review-actions" style="margin-top: 14px">
+      <main id="draftRows" class="review-rows"></main>
+      <div class="review-actions" id="publishBar" hidden>
         <span id="publishStatus" class="muted"></span>
         <button id="publishBtn" class="btn-primary">
           ⬆ Publish to live site
         </button>
       </div>
     </section>
+
+    <!-- Manage published -->
+    <section class="up-box">
+      <h2>3. Manage published questions</h2>
+      <p class="muted">
+        Load what's currently live, fix any field, or delete entries (e.g. a
+        wrongly-parsed paper), then save.
+      </p>
+      <div class="review-actions" style="justify-content: flex-start">
+        <button id="loadBtn" class="btn-ghost">↻ Load published bank</button>
+        <span id="manageStatus" class="muted"></span>
+      </div>
+      <main id="pubRows" class="review-rows"></main>
+      <div class="review-actions" id="saveBar" hidden>
+        <span id="saveStatus" class="muted"></span>
+        <button id="saveBtn" class="btn-primary">
+          💾 Save changes to live site
+        </button>
+      </div>
+    </section>
+
+    <datalist id="catList"></datalist>
 
     <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
     <script src="extract-core.js"></script>

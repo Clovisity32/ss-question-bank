@@ -14,7 +14,7 @@
     "issue": null,
     "chapter": null,
     "chapter_title": null,
-    "confidence": 1.0
+    "confidence": 1
   },
   {
     "id": "acs-br-2025-q7",
@@ -31,7 +31,7 @@
     "issue": 1,
     "chapter": 3,
     "chapter_title": "How do we decide what is good for society? (principles of governance)",
-    "confidence": 1.0
+    "confidence": 1
   },
   {
     "id": "andss-2025-q6",
@@ -48,7 +48,7 @@
     "issue": null,
     "chapter": null,
     "chapter_title": null,
-    "confidence": 1.0
+    "confidence": 1
   },
   {
     "id": "andss-2025-q7",
@@ -65,7 +65,7 @@
     "issue": 1,
     "chapter": 4,
     "chapter_title": "How can we work together for the good of society?",
-    "confidence": 1.0
+    "confidence": 1
   },
   {
     "id": "aiss-2025-q6",
@@ -82,7 +82,7 @@
     "issue": null,
     "chapter": null,
     "chapter_title": null,
-    "confidence": 1.0
+    "confidence": 1
   },
   {
     "id": "aiss-2025-q7",
@@ -99,7 +99,7 @@
     "issue": 2,
     "chapter": 6,
     "chapter_title": "Experiences and effects of living in a diverse society",
-    "confidence": 1.0
+    "confidence": 1
   },
   {
     "id": "amkss-2025-q6",
@@ -116,7 +116,7 @@
     "issue": null,
     "chapter": null,
     "chapter_title": null,
-    "confidence": 1.0
+    "confidence": 1
   },
   {
     "id": "amkss-2025-q7",
@@ -133,6 +133,40 @@
     "issue": 2,
     "chapter": 6,
     "chapter_title": "Experiences and effects of living in a diverse society",
-    "confidence": 1.0
+    "confidence": 1
+  },
+  {
+    "id": "aes-2025-q6",
+    "school": "AES",
+    "year": 2025,
+    "paper": "Prelim 4E5N",
+    "question_number": 6,
+    "context": "Extract 1 shows the trend in the total healthcare expenditure in Singapore from 2009 to 2020.",
+    "stem": "In your opinion, why has the total healthcare expenditure in Singapore increase over the years? Explain your answer with reference to two reasons. [7]",
+    "marks": 7,
+    "source_file": "2025 AES 4E5N SS Prelims QP 4.docx",
+    "bank": "Q6",
+    "category": "reasons",
+    "issue": null,
+    "chapter": null,
+    "chapter_title": null,
+    "confidence": 1
+  },
+  {
+    "id": "aes-2025-q7",
+    "school": "AES",
+    "year": 2025,
+    "paper": "Prelim 4E5N",
+    "question_number": 7,
+    "context": "Extracts 2 and 3 reflect the responses of governments in managing socio-cultural diversity.",
+    "stem": "Do you think that assimilation policies are more effective than integration policies in managing socio-cultural diversity? Explain your answer. [8]",
+    "marks": 8,
+    "source_file": "2025 AES 4E5N SS Prelims QP 4.docx",
+    "bank": "Q7",
+    "category": null,
+    "issue": 2,
+    "chapter": 7,
+    "chapter_title": "How can we respond to diversity?",
+    "confidence": 0.25
   }
 ]

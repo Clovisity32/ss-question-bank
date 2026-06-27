@@ -1,7 +1,11 @@
-// Student-facing question bank. Loads data/questions.json (+ optional taxonomy
-// for ordering) and renders Q6-by-category / Q7-by-topic with search & filters.
+// Student-facing question bank.
+// Top tabs: Q6 / Q7. Second-level tabs reveal questions ON CLICK:
+//   Q6 -> one tab per question type (category)
+//   Q7 -> one tab per Issue (questions grouped by chapter)
+// A search term shows matches across the whole current bank (bypasses the
+// click-to-reveal step); clearing it returns to the tab picker.
 
-const state = { bank: "Q6", category: "", search: "", school: "", year: "" };
+const state = { bank: "Q6", sub: null, search: "", school: "", year: "" };
 let DATA = [];
 let TAX = { categories: [], issues: [] };
 
@@ -59,7 +63,7 @@ function bindEvents() {
   document.querySelectorAll(".tab").forEach((t) =>
     t.addEventListener("click", () => {
       state.bank = t.dataset.bank;
-      state.category = "";
+      state.sub = null; // collapse — require a fresh click on the new bank
       document
         .querySelectorAll(".tab")
         .forEach((x) => x.classList.toggle("active", x === t));
@@ -67,7 +71,7 @@ function bindEvents() {
     }),
   );
   $("#search").addEventListener("input", (e) => {
-    state.search = e.target.value.toLowerCase();
+    state.search = e.target.value.toLowerCase().trim();
     render();
   });
   $("#schoolFilter").addEventListener("change", (e) => {
@@ -78,8 +82,16 @@ function bindEvents() {
     state.year = e.target.value;
     render();
   });
+
+  $("#subtabs").addEventListener("click", (e) => {
+    const b = e.target.closest(".subtab");
+    if (!b) return;
+    state.sub = b.dataset.sub === state.sub ? null : b.dataset.sub; // toggle off if re-clicked
+    render();
+  });
 }
 
+// meta filter (school/year/search) — NOT the sub-tab selection
 function matchesMeta(q) {
   if (q.bank !== state.bank) return false;
   if (state.school && q.school !== state.school) return false;
@@ -92,77 +104,95 @@ function matchesMeta(q) {
   return true;
 }
 
-function render() {
-  renderChips();
-  const pool = DATA.filter(matchesMeta);
-  const items =
-    state.bank === "Q6"
-      ? pool.filter((q) => !state.category || q.category === state.category)
-      : pool.filter(
-          (q) =>
-            !state.category || `${q.issue}|${q.chapter}` === state.category,
-        );
+const subKey = (q) =>
+  state.bank === "Q6" ? q.category || "uncategorised" : String(q.issue ?? "0");
 
+function render() {
+  renderSubtabs();
+  const pool = DATA.filter(matchesMeta);
+
+  // Search mode: show all matches across the bank, ignoring the click-to-reveal step.
+  if (state.search) {
+    $("#results").innerHTML = pool.length
+      ? state.bank === "Q6"
+        ? groupByCategory(pool)
+        : groupByChapter(pool)
+      : `<p class="empty">No questions match “${esc(state.search)}”.</p>`;
+    return;
+  }
+
+  // No sub-tab chosen yet -> prompt the user to click one.
+  if (!state.sub) {
+    const prompt =
+      state.bank === "Q6"
+        ? "Select a question type above to view its questions."
+        : "Select an issue above to view its questions.";
+    $("#results").innerHTML = `<p class="empty">${prompt}</p>`;
+    return;
+  }
+
+  const items = pool.filter((q) => subKey(q) === state.sub);
   if (!items.length) {
-    $("#results").innerHTML = `<p class="empty">No matching questions.</p>`;
+    $("#results").innerHTML =
+      `<p class="empty">No questions here with the current filters.</p>`;
     return;
   }
   $("#results").innerHTML =
-    state.bank === "Q6" ? groupQ6(items) : groupQ7(items);
+    state.bank === "Q6" ? groupByCategory(items) : groupByChapter(items);
 }
 
-function renderChips() {
+function renderSubtabs() {
   const pool = DATA.filter(matchesMeta);
-  let chips;
+  const counts = {};
+  for (const q of pool) counts[subKey(q)] = (counts[subKey(q)] || 0) + 1;
+
+  let tabs = [];
   if (state.bank === "Q6") {
-    const counts = countBy(pool, (q) => q.category);
-    const order = (
-      TAX.categories.length ? TAX.categories : Object.keys(counts)
-    ).filter((c) => counts[c]);
-    chips = order.map((c) => chip(c, c, counts[c]));
-  } else {
-    const counts = countBy(pool, (q) =>
-      q.issue ? `${q.issue}|${q.chapter}` : null,
+    const present = new Set(
+      DATA.filter((q) => q.bank === "Q6").map(
+        (q) => q.category || "uncategorised",
+      ),
     );
-    chips = [];
-    for (const iss of TAX.issues.length ? TAX.issues : derivedIssues(pool)) {
-      for (const ch of iss.chapters) {
-        const key = `${iss.issue}|${ch.chapter}`;
-        if (counts[key])
-          chips.push(chip(key, `I${iss.issue}·Ch${ch.chapter}`, counts[key]));
+    const ordered = [
+      ...(TAX.categories || []),
+      ...[...present].filter((c) => !TAX.categories.includes(c)),
+    ].filter((c) => present.has(c));
+    tabs = ordered.map((c) => subtab(c, c, counts[c] || 0));
+  } else {
+    for (const iss of TAX.issues.length
+      ? TAX.issues
+      : derivedIssues(DATA.filter((q) => q.bank === "Q7"))) {
+      const key = String(iss.issue);
+      if (DATA.some((q) => q.bank === "Q7" && String(q.issue) === key)) {
+        tabs.push(
+          subtab(key, `Issue ${iss.issue}: ${iss.title}`, counts[key] || 0),
+        );
       }
     }
   }
-  $("#chips").innerHTML = chip("", "All", pool.length) + chips.join("");
+  $("#subtabs").innerHTML = tabs.join("");
+  $("#subtabs").style.display = state.search ? "none" : "flex"; // hide picker during search
 }
 
-function chip(value, label, n) {
-  const active = state.category === value ? "active" : "";
-  return `<button class="chip ${active}" data-cat="${esc(value)}">${esc(label)}<span class="n">${n}</span></button>`;
+function subtab(value, label, n) {
+  const active = state.sub === value ? "active" : "";
+  return `<button class="subtab ${active}" data-sub="${esc(value)}">${esc(label)}<span class="n">${n}</span></button>`;
 }
 
-$("#chips") &&
-  document.addEventListener("click", (e) => {
-    const c = e.target.closest(".chip");
-    if (!c) return;
-    state.category = c.dataset.cat;
-    render();
-  });
-
-function groupQ6(items) {
+function groupByCategory(items) {
   const groups = groupBy(items, (q) => q.category || "uncategorised");
   return Object.keys(groups)
     .sort()
     .map(
       (cat) =>
-        `<section><h2 class="group-title">${esc(cat)} · ${groups[cat].length}</h2>` +
+        `<section><h2 class="group-title">give two ${esc(cat)} · ${groups[cat].length}</h2>` +
         groups[cat].map(card).join("") +
         `</section>`,
     )
     .join("");
 }
 
-function groupQ7(items) {
+function groupByChapter(items) {
   const groups = groupBy(items, (q) =>
     q.issue
       ? `Issue ${q.issue} · Ch ${q.chapter}: ${q.chapter_title || ""}`
@@ -197,14 +227,6 @@ function card(q) {
 }
 
 // ---- helpers ----
-function countBy(arr, fn) {
-  const o = {};
-  for (const x of arr) {
-    const k = fn(x);
-    if (k) o[k] = (o[k] || 0) + 1;
-  }
-  return o;
-}
 function groupBy(arr, fn) {
   const o = {};
   for (const x of arr) {
@@ -217,18 +239,13 @@ function derivedIssues(pool) {
   const m = {};
   for (const q of pool)
     if (q.issue) {
-      m[q.issue] = m[q.issue] || { issue: q.issue, chapters: {} };
+      m[q.issue] = m[q.issue] || { issue: q.issue, title: "", chapters: {} };
       m[q.issue].chapters[q.chapter] = {
         chapter: q.chapter,
         title: q.chapter_title,
       };
     }
-  return Object.values(m)
-    .sort((a, b) => a.issue - b.issue)
-    .map((i) => ({
-      issue: i.issue,
-      chapters: Object.values(i.chapters).sort((a, b) => a.chapter - b.chapter),
-    }));
+  return Object.values(m).sort((a, b) => a.issue - b.issue);
 }
 
 init();

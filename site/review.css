@@ -102,6 +102,33 @@
   font-size: 13px;
   margin: 0 0 4px;
 }
+.up-box {
+  max-width: 1100px;
+  margin: 16px auto 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  background: var(--card);
+}
+.up-box h2 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+.up-box input[type="file"] {
+  font: inherit;
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  padding: 9px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+.btn-ghost:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
 .rev-stem {
   margin: 0;
   font-weight: 500;

@@ -185,6 +185,11 @@ def _write_taxonomy() -> None:
     }
     TAXONOMY_OUT.write_text(json.dumps(taxonomy, indent=2, ensure_ascii=False), encoding="utf-8")
 
+    # Full rule set for the in-browser extractor (single source of truth = config/).
+    classify_cfg = {"categories": cats, "issues": issues}
+    (ROOT / "site" / "data" / "classify-config.json").write_text(
+        json.dumps(classify_cfg, indent=2, ensure_ascii=False), encoding="utf-8")
+
 
 def main() -> None:
     folder = Path(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_INPUT

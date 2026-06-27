@@ -72,6 +72,25 @@ pip install -r pipeline/requirements.txt
    The Pages workflow (`.github/workflows/pages.yml`) publishes the `site/` folder automatically.
    In the GitHub repo: **Settings → Pages → Source = GitHub Actions** (one-time).
 
+## Uploading papers through the website (no command line)
+
+The live site has a hidden admin page at **`/upload.html`** (not linked from the student bank — bookmark
+it). It lets you add papers without running Python:
+
+1. Open `https://<username>.github.io/ss-question-bank/upload.html`.
+2. **One-time:** create a GitHub **fine-grained personal access token** with **Contents: Read & write**
+   on this repo (<https://github.com/settings/personal-access-tokens>), paste it into _Publish settings_,
+   and click **Save token**. The token stays in your browser only — it is the publish lock, so **only you**
+   (the token holder) can add questions. Students who open the page can't publish.
+3. Choose one or more `.docx` papers. They are parsed **on your device** (the file is never uploaded);
+   the same Q6/Q7 detection + classification as the Python pipeline runs in the browser.
+4. Review the detected questions (fix any category / Issue·Chapter), then **Publish to live site**.
+   This commits the merged `questions.json` to the repo; the Pages workflow redeploys and students see the
+   new questions within ~1 minute. Questions are merged by id, so re-uploading a paper updates it in place.
+
+> The in-browser extractor (`site/extract-core.js`) is a direct port of the Python pipeline and uses the
+> same rules, exported to `site/data/classify-config.json` by `extract.py`.
+
 ## How classification works
 
 - **Q6 category** — the pipeline extracts the noun after `two`/`some` (e.g. "two **strategies**") and

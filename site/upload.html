@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upload Paper — SS Question Bank</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="review.css" />
+  </head>
+  <body class="review-body">
+    <header class="review-header">
+      <div>
+        <h1>Upload a Paper</h1>
+        <p class="muted">
+          Pick a <code>.docx</code> prelim paper. It is parsed
+          <strong>on this device</strong> — the file is never uploaded anywhere.
+          Review the detected Q6/Q7, then publish to the live site.
+        </p>
+      </div>
+      <a class="admin-link" href="index.html">← Back to bank</a>
+    </header>
+
+    <!-- Step 1: publish settings (token) -->
+    <section class="up-box">
+      <h2>1. Publish settings <span id="tokenState" class="muted"></span></h2>
+      <p class="muted">
+        Publishing writes to your GitHub repo, so only you (with the token) can
+        add questions. The token is stored only in this browser. Create a
+        fine-grained token with <strong>Contents: Read &amp; write</strong> on
+        this repo at
+        <a
+          href="https://github.com/settings/personal-access-tokens"
+          target="_blank"
+          rel="noopener"
+          >github.com/settings/personal-access-tokens</a
+        >.
+      </p>
+      <div class="rev-controls">
+        <label
+          >Repo (owner/name)<input
+            type="text"
+            id="repo"
+            placeholder="Clovisity32/ss-question-bank"
+        /></label>
+        <label
+          >GitHub token<input
+            type="password"
+            id="token"
+            placeholder="github_pat_…"
+            autocomplete="off"
+        /></label>
+        <label
+          >&nbsp;<button id="saveToken" class="btn-primary">
+            Save token
+          </button></label
+        >
+        <label
+          >&nbsp;<button id="clearToken" class="btn-ghost">
+            Forget token
+          </button></label
+        >
+      </div>
+    </section>
+
+    <!-- Step 2: choose file -->
+    <section class="up-box">
+      <h2>2. Choose paper(s)</h2>
+      <input type="file" id="file" accept=".docx" multiple />
+      <p id="parseStatus" class="muted"></p>
+    </section>
+
+    <!-- Step 3: review -->
+    <section class="up-box" id="reviewSection" hidden>
+      <h2>3. Review detected questions</h2>
+      <main id="rows" class="review-rows"></main>
+      <div class="review-actions" style="margin-top: 14px">
+        <span id="publishStatus" class="muted"></span>
+        <button id="publishBtn" class="btn-primary">
+          ⬆ Publish to live site
+        </button>
+      </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
+    <script src="extract-core.js"></script>
+    <script src="upload.js"></script>
+  </body>
+</html>

@@ -1,5 +1,5 @@
 {
-  "_comment": "Q7 topic taxonomy. The pipeline scores each Q7's context+stem against each chapter's keywords to suggest issue+chapter, then a human confirms in review.html. Keywords are lowercase substrings.",
+  "_comment": "Q7 topic taxonomy. classify_q7 counts keyword occurrences (prefix word-boundary, so plurals match) and weights multi-word phrases higher. Keep keywords DISTINCTIVE — avoid generic single words like 'citizen' or 'government' that appear in every question. Shared concepts (e.g. 'sense of belonging') may sit in more than one chapter; the distinctive keywords break the tie. A human confirms in review.html.",
   "issues": [
     {
       "issue": 1,
@@ -9,26 +9,33 @@
           "chapter": 1,
           "title": "What does citizenship mean to me?",
           "keywords": [
-            "citizen",
-            "citizenship",
-            "identity as a citizen",
-            "sense of belonging",
+            "what does citizenship mean",
+            "citizenship mean to",
             "national identity",
+            "sense of identity",
+            "attributes of a citizen",
+            "what it means to be a citizen",
             "rights and responsibilities",
-            "belonging"
+            "sense of belonging",
+            "sense of citizenship"
           ]
         },
         {
           "chapter": 2,
           "title": "Functions and roles of government",
           "keywords": [
-            "government",
             "functions of government",
+            "function of government",
+            "roles of government",
             "role of the government",
+            "role of government",
+            "provide services",
+            "provide public services",
+            "maintain order",
             "maintaining order",
-            "providing services",
             "safeguard",
-            "national interest"
+            "manage the economy",
+            "national defence"
           ]
         },
         {
@@ -37,14 +44,17 @@
           "keywords": [
             "good for society",
             "principles of governance",
-            "leadership is honest",
             "good leadership",
+            "leadership is honest",
             "meritocracy",
             "anticipate change",
             "reward for work",
             "stewardship",
             "common good",
-            "trade-off"
+            "trade-off",
+            "trade-offs",
+            "what is good for society",
+            "guiding principles"
           ]
         },
         {
@@ -53,14 +63,19 @@
           "keywords": [
             "work together",
             "working together",
+            "working to strengthen",
             "community groups",
-            "civic",
-            "partnership",
-            "collaboration",
+            "community organisations",
+            "civic participation",
             "ground-up",
-            "volunteer",
             "active citizenry",
-            "strengthen citizens"
+            "volunteer",
+            "partnership",
+            "role to play",
+            "more important role",
+            "sense of belonging",
+            "for the good of society",
+            "individuals and the government"
           ]
         }
       ]
@@ -73,18 +88,17 @@
           "chapter": 5,
           "title": "Factors that shape identities / contribute to diversity",
           "keywords": [
-            "shape identities",
             "factors that shape",
-            "diversity",
-            "diverse",
+            "shape the identities",
+            "shape identities",
+            "contribute to a diverse society",
+            "contribute to diversity",
+            "sources of diversity",
+            "what makes singapore diverse",
+            "exchange of skills",
             "nationality",
-            "race",
-            "religion",
-            "socio-economic",
-            "culture",
-            "immigration",
-            "foreigners",
-            "exchange of skills"
+            "socio-economic status",
+            "immigration"
           ]
         },
         {
@@ -93,14 +107,14 @@
           "keywords": [
             "experiences and effects",
             "living in a diverse society",
+            "effects of living in a diverse",
+            "benefits and challenges",
             "stereotype",
             "prejudice",
             "discrimination",
-            "harmony",
-            "tension",
-            "racial and religious",
-            "competition",
-            "benefits and challenges"
+            "racial and religious harmony",
+            "social tension",
+            "competition between"
           ]
         },
         {
@@ -108,13 +122,14 @@
           "title": "How can we respond to diversity?",
           "keywords": [
             "respond to diversity",
+            "respond to the effects of living",
+            "responses to diversity",
+            "manage diversity",
             "managing diversity",
-            "integration",
             "common space",
-            "policies",
-            "assimilation",
-            "accommodation",
-            "respond to the effects"
+            "integration",
+            "accommodate",
+            "ways in which individuals"
           ]
         }
       ]
@@ -127,61 +142,60 @@
           "chapter": 8,
           "title": "Factors that contribute to globalisation",
           "keywords": [
-            "globalisation",
-            "globalization",
+            "factors that contribute to globalisation",
             "driving forces",
-            "factors that contribute",
-            "technology",
-            "trade",
+            "what is globalisation",
             "interconnected",
+            "advancement in technology",
             "flow of goods",
-            "multinational"
+            "growth of multinational"
           ]
         },
         {
           "chapter": 9,
           "title": "Responding to economic impacts of globalisation",
           "keywords": [
+            "economic impacts of globalisation",
             "economic impact",
-            "economic impacts",
-            "jobs",
-            "wages",
-            "inequality",
-            "income gap",
             "competition for jobs",
+            "loss of jobs",
+            "income gap",
+            "wage gap",
             "economic growth",
             "upskill",
-            "workforce"
+            "workforce",
+            "widening inequality"
           ]
         },
         {
           "chapter": 10,
           "title": "Responding to cultural impacts of globalisation",
           "keywords": [
+            "cultural impacts of globalisation",
             "cultural impact",
-            "cultural impacts",
-            "cultural",
-            "hybridisation",
-            "local culture",
+            "spread of culture",
+            "cultural hybridisation",
+            "loss of local culture",
             "homogenisation",
             "westernisation",
-            "cultural diffusion"
+            "cultural diffusion",
+            "erosion of culture"
           ]
         },
         {
           "chapter": 11,
           "title": "Responding to security impacts of globalisation",
           "keywords": [
+            "security impacts of globalisation",
             "security impact",
-            "security impacts",
-            "security",
             "terrorism",
-            "cyber",
-            "transnational",
             "self-radicalisation",
             "radicalisation",
+            "cyber",
+            "transnational",
             "online scams",
-            "threat"
+            "security threat",
+            "spread of diseases"
           ]
         }
       ]

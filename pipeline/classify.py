@@ -55,23 +55,39 @@ def classify_q6(text: str) -> tuple[str | None, str, float]:
 _ISSUES = _load("chapters.json")["issues"]
 
 
+def _compile_chapters():
+    """Pre-compile each keyword to a prefix-boundary regex (so plurals match)
+    with a weight that rewards distinctive multi-word phrases."""
+    for issue in _ISSUES:
+        for ch in issue["chapters"]:
+            ch["_kw"] = [
+                (re.compile(r"\b" + re.escape(kw), re.I), 1.0 + 0.7 * (len(kw.split()) - 1))
+                for kw in ch["keywords"]
+            ]
+
+
+_compile_chapters()
+
+
 def classify_q7(text: str) -> tuple[int | None, int | None, str | None, float]:
     """Return (issue, chapter, chapter_title, confidence)."""
-    low = text.lower()
-    best = None
-    best_score = 0.0
+    scored = []
     for issue in _ISSUES:
         for ch in issue["chapters"]:
             score = 0.0
-            for kw in ch["keywords"]:
-                if kw in low:
-                    # weight by keyword specificity (length / word count)
-                    score += 1.0 + 0.25 * len(kw.split())
-            if score > best_score:
-                best_score = score
-                best = (issue["issue"], ch["chapter"], ch["title"])
-    if not best:
+            for pat, weight in ch["_kw"]:
+                n = len(pat.findall(text))
+                if n:
+                    score += weight * (1 + 0.4 * (n - 1))  # diminishing returns for repeats
+            scored.append((score, issue["issue"], ch["chapter"], ch["title"]))
+
+    scored.sort(key=lambda x: x[0], reverse=True)
+    best = scored[0]
+    if best[0] == 0:
         return None, None, None, 0.0
-    # confidence: saturating function of raw score
-    conf = min(1.0, best_score / 3.0)
-    return best[0], best[1], best[2], round(conf, 2)
+
+    second = scored[1][0] if len(scored) > 1 else 0.0
+    conf = min(1.0, best[0] / 4.0)
+    if best[0] - second < 1.0:          # ambiguous: close call between two chapters
+        conf = min(conf, 0.45)          # force it into the review queue
+    return best[1], best[2], best[3], round(conf, 2)

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SS Question Bank — Q6 &amp; Q7</title>
+    <meta
+      name="description"
+      content="Singapore Combined Humanities / Social Studies prelim question bank: Q6 by question type, Q7 by topic."
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="app-header-inner">
+        <h1>Social Studies Question Bank</h1>
+        <p class="sub">
+          Combined Humanities (SS) prelim Structured-Response Questions · Q6
+          &amp; Q7
+        </p>
+        <div class="tabs">
+          <button class="tab active" data-bank="Q6">
+            Q6 — by question type
+          </button>
+          <button class="tab" data-bank="Q7">Q7 — by topic</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="controls">
+      <input
+        type="search"
+        id="search"
+        placeholder="Search questions…"
+        autocomplete="off"
+      />
+      <select id="schoolFilter">
+        <option value="">All schools</option>
+      </select>
+      <select id="yearFilter">
+        <option value="">All years</option>
+      </select>
+    </div>
+
+    <div class="chips" id="chips"></div>
+
+    <main class="results" id="results"></main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

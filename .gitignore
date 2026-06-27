@@ -1,0 +1,16 @@
+# Source materials — never published
+Question Paper/
+Test/
+Topic/
+
+# Pipeline intermediate output (pre-review)
+site/data/questions.draft.json
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# OS / editor
+.DS_Store
+Thumbs.db

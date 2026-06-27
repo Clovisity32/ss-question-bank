@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Review &amp; Publish — SS Question Bank</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="review.css" />
+  </head>
+  <body class="review-body">
+    <header class="review-header">
+      <div>
+        <h1>Review &amp; Publish</h1>
+        <p class="muted">
+          Confirm each question's category / topic, then download
+          <code>questions.json</code> into <code>site/data/</code>.
+        </p>
+      </div>
+      <div class="review-actions">
+        <span id="status" class="muted"></span>
+        <button id="downloadBtn" class="btn-primary">
+          ⬇ Download questions.json
+        </button>
+      </div>
+    </header>
+
+    <div class="review-toolbar">
+      <label
+        ><input type="checkbox" id="flaggedOnly" /> Show only flagged /
+        low-confidence</label
+      >
+      <span id="counts" class="muted"></span>
+    </div>
+
+    <main id="rows" class="review-rows"></main>
+
+    <script src="review.js"></script>
+  </body>
+</html>

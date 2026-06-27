@@ -1,0 +1,76 @@
+{
+  "_comment": "Q6 'give two X' categories. Each canonical category maps to a list of synonyms/variants (singular or plural). The pipeline extracts the noun after 'two|some' in the question, singularises it, and matches it here. Unknown nouns are kept verbatim and flagged for review. Add new entries freely.",
+  "categories": {
+    "strategies": [
+      "strategy",
+      "strategies",
+      "way",
+      "ways",
+      "measure",
+      "measures",
+      "method",
+      "methods",
+      "approach",
+      "approaches",
+      "step",
+      "steps",
+      "action",
+      "actions"
+    ],
+    "suggestions": [
+      "suggestion",
+      "suggestions",
+      "recommendation",
+      "recommendations",
+      "idea",
+      "ideas",
+      "proposal",
+      "proposals"
+    ],
+    "reasons": ["reason", "reasons", "factor", "factors", "cause", "causes"],
+    "benefits": [
+      "benefit",
+      "benefits",
+      "advantage",
+      "advantages",
+      "gain",
+      "gains"
+    ],
+    "consequences": [
+      "consequence",
+      "consequences",
+      "outcome",
+      "outcomes",
+      "effect",
+      "effects",
+      "result",
+      "results",
+      "implication",
+      "implications"
+    ],
+    "impacts": ["impact", "impacts", "influence", "influences"],
+    "challenges": [
+      "challenge",
+      "challenges",
+      "problem",
+      "problems",
+      "difficulty",
+      "difficulties",
+      "drawback",
+      "drawbacks",
+      "disadvantage",
+      "disadvantages"
+    ],
+    "messages": ["message", "messages", "point", "points"],
+    "lessons": [
+      "lesson",
+      "lessons",
+      "learning",
+      "learnings",
+      "takeaway",
+      "takeaways"
+    ],
+    "advice": ["advice", "advices"],
+    "dreams": ["dream", "dreams", "aspiration", "aspirations", "hope", "hopes"]
+  }
+}

@@ -55,7 +55,21 @@
   }
 
   const TRIGGER =
-    /(In your opinion\b|Do you think\b|What can\b|What are\b|What do\b|Why \b|How can\b|How far\b|How do\b|Suggest\b|Explain how\b)/i;
+    /(In your opinion\b|Do you think\b|Do you agree\b|Do you feel\b|Do you believe\b|To what extent\b|What can\b|What are\b|What do\b|Why \b|Why do\b|How can\b|How far\b|How do\b|Suggest\b|Explain how\b)/i;
+
+  // Content signatures used to locate the two Section-B questions without relying
+  // on a printed number (some papers auto-number, leaving no number in the text).
+  const Q7_TRIGGER =
+    /\b(Do you think|Do you agree|Do you feel|Do you believe|To what extent|How far do you agree)\b/i;
+  // Q6 always asks for "two <noun>" — the reliable structural signal (a discursive
+  // Q6 like "why do you think…" still has this; "some of the…" must NOT match).
+  const GIVE_TWO = /\btwo\s+[a-z]+/i;
+  const HAS_MARKS = /\[\s*\d+\s*\]/;
+  // does a (number-stripped) line begin with the instruction itself (no inline lead-in)?
+  const INSTRUCTION_START =
+    /^(In your opinion|Do you think|Do you agree|Do you feel|Do you believe|To what extent|How far|Suggest|Why do you|How can|What can|What are|What do|Explain how)/i;
+  const BARE_LABEL = /^(extract|source)\s*\d*\s*:?\s*$/i;
+  const END_PAPER = /(^|~\s*)end of (the )?paper/i;
 
   function splitContextStem(text) {
     const m = TRIGGER.exec(text);
@@ -82,15 +96,37 @@
     "V1",
   ]);
 
-  function metadata(filename) {
+  const SCHOOL_RE =
+    /([A-Z][A-Za-z.'()&/-]*(?:\s+[A-Z][A-Za-z.'()&/-]*){0,4}?\s+(?:SECONDARY SCHOOL|INSTITUTION|JUNIOR COLLEGE|HIGH SCHOOL))/i;
+  const titleCase = (s) =>
+    s.replace(/\w\S*/g, (w) => w[0].toUpperCase() + w.slice(1).toLowerCase());
+
+  function detectSchool(segments) {
+    for (const seg of segments.slice(0, 14)) {
+      const m = SCHOOL_RE.exec(seg.text);
+      if (m) {
+        let name = m[1].replace(/\s+/g, " ").trim();
+        name = name.replace(/^(?:[A-Z]\s+)+/, ""); // drop stray leading logo letters
+        name = name
+          .replace(/\s*\b(secondary school|high school)\b/i, "")
+          .trim();
+        return name === name.toUpperCase() ? titleCase(name) : name;
+      }
+    }
+    return null;
+  }
+
+  function metadata(filename, segments) {
     const stem = filename.replace(/\.[^.]+$/, "");
     const ym = stem.match(/(20\d{2})/);
     const year = ym ? parseInt(ym[1], 10) : null;
-    let school = null;
-    for (const tok of stem.match(/[A-Z]{2,}(?:\([A-Za-z]+\))?/g) || []) {
-      if (!STOP_TOKENS.has(tok.toUpperCase())) {
-        school = tok;
-        break;
+    let school = detectSchool(segments || []);
+    if (!school) {
+      for (const tok of stem.match(/[A-Z]{2,}(?:\([A-Za-z]+\))?/g) || []) {
+        if (!STOP_TOKENS.has(tok.toUpperCase())) {
+          school = tok;
+          break;
+        }
       }
     }
     const lm = stem.match(/(S?4E5N|4E5N|S4E5N|4E|5N|4N)/);
@@ -231,32 +267,101 @@
     });
   }
 
+  const stripNum = (t) => t.replace(/^\s*[67][.)\s]+/, "").trim();
+
+  // Does this question line already carry its own lead-in, or do we need to pull
+  // the short context sentence from the preceding segment?
+  const needsContext = (seg) => INSTRUCTION_START.test(stripNum(seg.text));
+
+  // Short lead-in sentence (e.g. "Extract 1 states ...") — never a source passage.
+  function contextLike(seg) {
+    const t = seg.text;
+    return !!t && t.length <= 240 && !BARE_LABEL.test(t) && !HAS_MARKS.test(t);
+  }
+  function findContext(qp, idx, otherIdx) {
+    for (let j = idx - 1; j >= Math.max(0, idx - 3); j--) {
+      if (j === otherIdx) break;
+      if (BARE_LABEL.test(qp[j].text)) continue; // skip "Extract 1" labels
+      return contextLike(qp[j]) ? qp[j].text : "";
+    }
+    return "";
+  }
+  function buildText(qp, idx, otherIdx) {
+    const body = stripNum(qp[idx].text);
+    const ctx = needsContext(qp[idx]) ? findContext(qp, idx, otherIdx) : "";
+    return (ctx ? ctx + " " : "") + body;
+  }
+
   function extractFromSegments(segments, filename, cfg) {
-    const qp = questionPaperRegion(segments);
-    const meta = metadata(filename);
-    const i6 = findStart(qp, 6),
-      i7 = findStart(qp, 7),
-      i8 = findStart(qp, 8);
+    let qp = questionPaperRegion(segments);
+    for (let i = 0; i < qp.length; i++) {
+      if (END_PAPER.test(qp[i].text)) {
+        qp = qp.slice(0, i);
+        break;
+      } // drop acknowledgements
+    }
+    const meta = metadata(filename, segments);
     const records = [],
       warnings = [];
 
-    if (i6 !== null) {
-      const end = i7 !== null ? i7 : i8 !== null ? i8 : qp.length;
-      records.push(makeQ6(blockText(qp, i6, end, 6), meta, filename, cfg));
-    } else warnings.push("Q6 not found");
-
-    if (i7 !== null) {
-      let end = i8 !== null ? i8 : qp.length;
-      for (let j = i7 + 1; j < end; j++) {
-        if (/END OF (THE )?PAPER/i.test(qp[j].text)) {
-          end = j;
-          break;
+    // Q6 = the "two <noun> [marks]" line (the SRQ "give two" question).
+    let q6i = -1;
+    for (let i = qp.length - 1; i >= 0; i--) {
+      if (GIVE_TWO.test(qp[i].text) && HAS_MARKS.test(qp[i].text)) {
+        q6i = i;
+        break;
+      }
+    }
+    // Q7 = a discursive line that is NOT the "two <noun>" question. Prefer one
+    // after Q6 with marks; otherwise search the whole region.
+    let q7i = -1;
+    const pickQ7 = (from) => {
+      for (let i = from; i < qp.length; i++) {
+        if (i === q6i) continue;
+        if (Q7_TRIGGER.test(qp[i].text) && !GIVE_TWO.test(qp[i].text)) {
+          q7i = i;
+          if (HAS_MARKS.test(qp[i].text)) return true;
         }
       }
-      records.push(makeQ7(blockText(qp, i7, end, 7), meta, filename, cfg));
-    } else warnings.push("Q7 not found");
+      return q7i >= 0;
+    };
+    if (!(q6i >= 0 && pickQ7(q6i + 1))) pickQ7(0);
+
+    // Fallback to the old printed-number anchor if content detection missed.
+    if (q6i < 0) {
+      const f = findStart(qp, 6);
+      if (f !== null) q6i = f;
+    }
+    if (q7i < 0) {
+      const f = findStart(qp, 7);
+      if (f !== null && f !== q6i) q7i = f;
+    }
+
+    if (q6i >= 0)
+      records.push(makeQ6(buildText(qp, q6i, q7i), meta, filename, cfg));
+    else warnings.push("Q6 not found");
+    if (q7i >= 0)
+      records.push(makeQ7(buildText(qp, q7i, q6i), meta, filename, cfg));
+    else warnings.push("Q7 not found");
 
     return { records, warnings, meta };
+  }
+
+  // textContent but with spaces inserted between block elements, so two stacked
+  // <p>s in one cell don't fuse ("learning." + "In your opinion" -> with a space).
+  function textOf(el) {
+    let out = "";
+    for (const n of el.childNodes) {
+      if (n.nodeType === 3) out += n.textContent;
+      else if (n.nodeType === 1) {
+        const t = n.tagName.toLowerCase();
+        const inner = textOf(n);
+        out += /^(p|div|br|li|h[1-6]|tr|table|blockquote)$/.test(t)
+          ? " " + inner + " "
+          : inner;
+      }
+    }
+    return out;
   }
 
   // Convert mammoth-produced HTML into ordered segments.
@@ -268,12 +373,12 @@
         const tag = el.tagName.toLowerCase();
         if (tag === "table") {
           for (const tr of el.querySelectorAll("tr")) {
-            const cells = [...tr.children].map((td) => norm(td.textContent));
+            const cells = [...tr.children].map((td) => norm(textOf(td)));
             const text = norm(dedupCells(cells));
-            if (text) segs.push({ kind: "row", text, cells: cells.map(norm) });
+            if (text) segs.push({ kind: "row", text, cells });
           }
         } else if (/^(p|h[1-6]|li|blockquote)$/.test(tag)) {
-          const t = norm(el.textContent);
+          const t = norm(textOf(el));
           if (t) segs.push({ kind: "para", text: t });
         } else if (el.children.length) {
           walk(el);

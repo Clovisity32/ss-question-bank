@@ -23,10 +23,25 @@ CONFIG = ROOT / "config"
 
 _MARKS_RE = re.compile(r"\[\s*(\d+)\s*\]")
 _TRIGGER_RE = re.compile(
-    r"(In your opinion\b|Do you think\b|What can\b|What are\b|What do\b|Why \b|"
+    r"(In your opinion\b|Do you think\b|Do you agree\b|Do you feel\b|Do you believe\b|"
+    r"To what extent\b|What can\b|What are\b|What do\b|Why \b|Why do\b|"
     r"How can\b|How far\b|How do\b|Suggest\b|Explain how\b)",
     re.I,
 )
+
+# Content signatures to locate the two Section-B questions without a printed number.
+_Q7_TRIGGER = re.compile(
+    r"\b(Do you think|Do you agree|Do you feel|Do you believe|To what extent|How far do you agree)\b", re.I)
+_GIVE_TWO = re.compile(r"\btwo\s+[a-z]+", re.I)          # Q6 asks for "two <noun>"
+_HAS_MARKS = re.compile(r"\[\s*\d+\s*\]")
+_INSTRUCTION_START = re.compile(
+    r"^(In your opinion|Do you think|Do you agree|Do you feel|Do you believe|To what extent|"
+    r"How far|Suggest|Why do you|How can|What can|What are|What do|Explain how)", re.I)
+_BARE_LABEL = re.compile(r"^(extract|source)\s*\d*\s*:?\s*$", re.I)
+_END_PAPER = re.compile(r"(^|~\s*)end of (the )?paper", re.I)
+_SCHOOL_RE = re.compile(
+    r"([A-Z][A-Za-z.'()&/-]*(?:\s+[A-Z][A-Za-z.'()&/-]*){0,4}?\s+"
+    r"(?:SECONDARY SCHOOL|INSTITUTION|JUNIOR COLLEGE|HIGH SCHOOL))", re.I)
 
 
 # ---- locate a question by its leading number within QP segments ------------
@@ -71,18 +86,31 @@ def _marks(text: str) -> int | None:
 _STOP_TOKENS = {"SS", "QP", "AS", "PRELIM", "PRELIMS", "SECTION", "HUM", "AND", "V2", "V1"}
 
 
-def _metadata(filename: str) -> dict:
+def _detect_school(segments: list[Segment]) -> str | None:
+    """Find the school name in the paper header (more reliable than filenames)."""
+    for seg in segments[:14]:
+        m = _SCHOOL_RE.search(seg.text)
+        if m:
+            name = re.sub(r"\s+", " ", m.group(1)).strip()
+            name = re.sub(r"^(?:[A-Z]\s+)+", "", name)  # drop stray leading logo/bullet letters
+            name = re.sub(r"\s*\b(secondary school|high school)\b", "", name, flags=re.I).strip()
+            return name.title() if name.isupper() else name
+    return None
+
+
+def _metadata(filename: str, segments: list[Segment]) -> dict:
     stem = Path(filename).stem
     year_m = re.search(r"(20\d{2})", stem)
     year = int(year_m.group(1)) if year_m else None
 
-    school = None
-    for tok in re.findall(r"[A-Z]{2,}(?:\([A-Za-z]+\))?", stem):
-        if tok.upper() not in _STOP_TOKENS:
-            school = tok
-            break
+    # School: prefer the document header; fall back to a filename acronym.
+    school = _detect_school(segments)
+    if not school:
+        for tok in re.findall(r"[A-Z]{2,}(?:\([A-Za-z]+\))?", stem):
+            if tok.upper() not in _STOP_TOKENS:
+                school = tok
+                break
 
-    level_m = re.search(r"\b(S?\d?E?\d?N?)\b", stem)  # fallback
     level_m = re.search(r"(S?4E5N|4E5N|S4E5N|4E|5N|4N)", stem)
     level = level_m.group(1) if level_m else None
     paper = f"Prelim {level}" if level else "Prelim"
@@ -97,32 +125,79 @@ def _slug(s: str) -> str:
 
 # ---- per-paper extraction -------------------------------------------------
 
-def extract_paper(path: Path) -> list[dict]:
-    qp = question_paper_region(read_paper(path))
-    meta = _metadata(path.name)
+def _strip_num(t: str) -> str:
+    return re.sub(r"^\s*[67][.)\s]+", "", t).strip()
 
-    i6 = _find_start(qp, 6)
-    i7 = _find_start(qp, 7)
-    i8 = _find_start(qp, 8)
+
+def _needs_context(seg: Segment) -> bool:
+    return bool(_INSTRUCTION_START.match(_strip_num(seg.text)))
+
+
+def _context_like(seg: Segment) -> bool:
+    t = seg.text
+    return bool(t) and len(t) <= 240 and not _BARE_LABEL.match(t) and not _HAS_MARKS.search(t)
+
+
+def _find_context(qp: list[Segment], idx: int, other: int) -> str:
+    for j in range(idx - 1, max(-1, idx - 4), -1):
+        if j == other:
+            break
+        if _BARE_LABEL.match(qp[j].text):
+            continue
+        return qp[j].text if _context_like(qp[j]) else ""
+    return ""
+
+
+def _build_text(qp: list[Segment], idx: int, other: int) -> str:
+    body = _strip_num(qp[idx].text)
+    ctx = _find_context(qp, idx, other) if _needs_context(qp[idx]) else ""
+    return f"{ctx} {body}".strip() if ctx else body
+
+
+def extract_paper(path: Path) -> list[dict]:
+    all_segs = read_paper(path)
+    qp = question_paper_region(all_segs)
+    for i, seg in enumerate(qp):
+        if _END_PAPER.search(seg.text):
+            qp = qp[:i]
+            break
+    meta = _metadata(path.name, all_segs)
+
+    # Q6 = the "two <noun> [marks]" line.
+    q6i = next((i for i in range(len(qp) - 1, -1, -1)
+                if _GIVE_TWO.search(qp[i].text) and _HAS_MARKS.search(qp[i].text)), None)
+
+    # Q7 = a discursive (non "two <noun>") line, preferably after Q6 and with marks.
+    def pick_q7(start: int) -> int | None:
+        found = None
+        for i in range(start, len(qp)):
+            if i == q6i:
+                continue
+            if _Q7_TRIGGER.search(qp[i].text) and not _GIVE_TWO.search(qp[i].text):
+                found = i
+                if _HAS_MARKS.search(qp[i].text):
+                    return i
+        return found
+
+    q7i = pick_q7(q6i + 1) if q6i is not None else None
+    if q7i is None:
+        q7i = pick_q7(0)
+
+    # Fallback to printed-number anchor.
+    if q6i is None:
+        q6i = _find_start(qp, 6)
+    if q7i is None:
+        f = _find_start(qp, 7)
+        q7i = f if f != q6i else None
 
     records: list[dict] = []
-
-    if i6 is not None:
-        end = i7 if i7 is not None else (i8 if i8 is not None else len(qp))
-        records.append(_make_q6(_block_text(qp, i6, end, 6), meta, path))
-    if i7 is not None:
-        end = i8 if i8 is not None else len(qp)
-        # stop at END OF PAPER if present
-        for j in range(i7 + 1, end):
-            if re.search(r"END OF (THE )?PAPER", qp[j].text, re.I):
-                end = j
-                break
-        records.append(_make_q7(_block_text(qp, i7, end, 7), meta, path))
-
-    # flag papers missing a question
-    if i6 is None:
+    if q6i is not None:
+        records.append(_make_q6(_build_text(qp, q6i, q7i if q7i is not None else -1), meta, path))
+    else:
         print(f"  !! Q6 not found in {path.name}")
-    if i7 is None:
+    if q7i is not None:
+        records.append(_make_q7(_build_text(qp, q7i, q6i if q6i is not None else -1), meta, path))
+    else:
         print(f"  !! Q7 not found in {path.name}")
     return records
 

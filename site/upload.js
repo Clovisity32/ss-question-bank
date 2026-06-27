@@ -6,6 +6,9 @@ let TAX = { categories: [], issues: [] };
 let DRAFT = []; // parsed, pending publish
 let PUB = [],
   PUB_SHA = null; // loaded live bank, for editing/deleting
+let EXISTING_IDS = new Set(); // ids already in the published bank (for dup warnings)
+
+const confirmAction = (msg) => window.confirm(msg); // wrapper so it can be stubbed in tests
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) =>
@@ -39,6 +42,15 @@ async function init() {
     .join("");
   $("#repo").value =
     localStorage.getItem(LS.repo) || "Clovisity32/ss-question-bank";
+  // existing ids from the (public) live data — used to warn about duplicates
+  try {
+    const live = await fetch("data/questions.json?t=" + Date.now()).then((r) =>
+      r.json(),
+    );
+    EXISTING_IDS = new Set(live.map((q) => q.id));
+  } catch {
+    /* first deploy may have none */
+  }
   refreshTokenState();
   bind();
 }
@@ -119,6 +131,17 @@ function topicOptions(q) {
   return html;
 }
 
+function dupBadge(q, arr) {
+  if (arr !== "draft") return "";
+  const inBatch = DRAFT.filter((d) => d.id === q.id).length > 1;
+  const inBank = EXISTING_IDS.has(q.id);
+  if (inBatch)
+    return `<span class="flag-pill dup">⚠ duplicate id in this upload</span>`;
+  if (inBank)
+    return `<span class="flag-pill warn">↻ already in bank — publishing overwrites it</span>`;
+  return "";
+}
+
 function editorCard(q, arr, i) {
   const low = (q.confidence ?? 1) < 0.6;
   const flagged = q.needs_review || low;
@@ -137,6 +160,7 @@ function editorCard(q, arr, i) {
         </select></label>
       ${q.confidence != null ? `<span class="conf ${low ? "low" : ""}">conf ${q.confidence.toFixed(2)}</span>` : ""}
       ${flagged ? `<span class="flag-pill">check this</span>` : ""}
+      ${dupBadge(q, arr)}
       <button class="btn-ghost danger" data-del="${arr}" data-i="${i}">${arr === "pub" ? "Delete" : "Remove"}</button>
     </div>
     <div class="rev-controls">
@@ -205,13 +229,25 @@ function onEdit(e) {
   } else {
     q[f] = el.value || null;
   }
-  if (["school", "year", "question_number"].includes(f)) reId(q);
+  if (["school", "year", "question_number"].includes(f)) {
+    reId(q);
+    // refresh duplicate badges once the field is committed (blur), not per keystroke
+    if (arr === "draft" && e.type === "change") renderDraft();
+  }
 }
 
 function onClick(e) {
   const del = e.target.closest("[data-del]");
   if (!del) return;
   const arr = del.dataset.del;
+  const q = arrayOf(arr)[Number(del.dataset.i)];
+  if (
+    arr === "pub" &&
+    !confirmAction(
+      `Delete this question from the live bank?\n\n${q.school || "?"} · ${q.bank} · ${(q.stem || "").slice(0, 70)}…\n\nIt is removed when you click “Save changes”.`,
+    )
+  )
+    return;
   arrayOf(arr).splice(Number(del.dataset.i), 1);
   (arr === "pub" ? renderPub : renderDraft)();
 }
@@ -279,12 +315,21 @@ async function publish() {
       byId.has(r.id) ? updated++ : added++;
       byId.set(r.id, r);
     }
+    if (
+      updated &&
+      !confirmAction(
+        `Publish ${DRAFT.length} question(s)? ${updated} will overwrite an existing question with the same id, ${added} are new.`,
+      )
+    )
+      return set("#publishStatus", "Publish cancelled.");
+    const merged = [...byId.values()];
     await putLive(
       c,
-      [...byId.values()],
+      merged,
       sha,
       `data: add/update ${DRAFT.length} question(s) via admin`,
     );
+    merged.forEach((q) => EXISTING_IDS.add(q.id));
     DRAFT = [];
     renderDraft();
     set(
@@ -306,6 +351,7 @@ async function loadPublished() {
     const { arr, sha } = await getLive(c);
     PUB = arr;
     PUB_SHA = sha;
+    EXISTING_IDS = new Set(PUB.map((q) => q.id));
     renderPub();
   } catch (err) {
     set("#manageStatus", `Load failed — ${err.message}`, true);
@@ -315,6 +361,12 @@ async function saveChanges() {
   const c = ctx();
   if (!c.token)
     return set("#saveStatus", "Add your token in step 1 first.", true);
+  if (
+    !confirmAction(
+      `Save changes to the live site?\n\nThis replaces the published bank with the ${PUB.length} question(s) shown here (any you deleted will be permanently removed).`,
+    )
+  )
+    return set("#saveStatus", "Save cancelled.");
   set("#saveStatus", "Saving…");
   try {
     const { sha } = await getLive(c); // freshest sha to avoid conflicts
@@ -324,6 +376,7 @@ async function saveChanges() {
       sha,
       `data: edit/delete via admin (${PUB.length} remain)`,
     );
+    EXISTING_IDS = new Set(PUB.map((q) => q.id));
     PUB_SHA = sha;
     set("#saveStatus", `✓ Saved ${PUB.length} question(s). Live in ~1 min.`);
   } catch (err) {

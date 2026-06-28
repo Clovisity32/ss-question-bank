@@ -1,0 +1,2 @@
+# Normalize line endings: let Git store LF and check out native.
+* text=auto

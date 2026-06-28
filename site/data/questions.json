@@ -326,5 +326,37 @@
     "issue": 1,
     "chapter": 3,
     "chapter_title": "How do we decide what is good for society? (principles of governance)"
+  },
+  {
+    "id": "broadrick-2025-q6",
+    "school": "Broadrick",
+    "year": 2025,
+    "paper": "Prelim 4E",
+    "question_number": 6,
+    "context": "6 Extract 1 suggests that there is a decline in the use of mother tongue languages at home.",
+    "stem": "In your opinion, why do you think Singaporeans today no longer speak mother tongue languages at home? Explain your answer with reference to two reasons. [7]",
+    "marks": 7,
+    "source_file": "BRD_4E_Prelim_2025.docx",
+    "bank": "Q6",
+    "category": "reasons",
+    "issue": null,
+    "chapter": null,
+    "chapter_title": null
+  },
+  {
+    "id": "broadrick-2025-q7",
+    "school": "Broadrick",
+    "year": 2025,
+    "paper": "Prelim 4E",
+    "question_number": 7,
+    "context": "Extracts 2 and 3 reflect on some principles of governance contributing to the development of Singapore in Singapore.",
+    "stem": "Do you think that practising meritocracy is more important than anticipating change and staying relevant in contributing to the development of Singapore? Explain your answer. [8]",
+    "marks": 8,
+    "source_file": "BRD_4E_Prelim_2025.docx",
+    "bank": "Q7",
+    "category": null,
+    "issue": 1,
+    "chapter": 3,
+    "chapter_title": "How do we decide what is good for society? (principles of governance)"
   }
 ]

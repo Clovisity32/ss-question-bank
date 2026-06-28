@@ -78,6 +78,7 @@ function bind() {
     refreshTokenState();
   });
   $("#file").addEventListener("change", onFiles);
+  $("#clearDraftBtn").addEventListener("click", clearDraft);
   $("#publishBtn").addEventListener("click", publish);
   $("#loadBtn").addEventListener("click", loadPublished);
   $("#saveBtn").addEventListener("click", saveChanges);
@@ -185,6 +186,23 @@ function renderDraft() {
     editorCard(q, "draft", i),
   ).join("");
   $("#publishBar").hidden = DRAFT.length === 0;
+}
+// Discard the pending (un-published) batch and reset the file input, so a new
+// upload starts fresh instead of stacking onto questions left over from a
+// cancelled/failed publish — no page refresh needed.
+function clearDraft() {
+  if (
+    DRAFT.length &&
+    !confirmAction(
+      `Discard ${DRAFT.length} unpublished question(s) in this draft?`,
+    )
+  )
+    return;
+  DRAFT = [];
+  $("#file").value = "";
+  $("#parseStatus").textContent = "";
+  renderDraft();
+  set("#publishStatus", "Draft cleared.");
 }
 function renderPub() {
   $("#pubRows").innerHTML = PUB.map((q, i) => editorCard(q, "pub", i)).join("");
@@ -294,6 +312,27 @@ async function putLive(c, arr, sha, message) {
   if (!r.ok) throw new Error(`${r.status}: ${(await r.text()).slice(0, 160)}`);
   return r.json();
 }
+const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
+// PUT, retrying on 409. GitHub's Contents API is read-after-write *eventually*
+// consistent: right after a successful write, a follow-up GET can still return
+// the previous sha, so the next PUT is rejected with 409 "does not match". We
+// re-fetch the head sha and retry instead of forcing the user to refresh.
+async function putWithRetry(c, arr, message, sha, statusSel) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await putLive(c, arr, sha, message);
+    } catch (err) {
+      if (attempt < 2 && /^409:/.test(err.message)) {
+        if (statusSel)
+          set(statusSel, `Sync conflict — retrying (${attempt + 1}/2)…`);
+        await sleep(600 * (attempt + 1));
+        sha = (await getLive(c)).sha; // freshest sha, then retry
+        continue;
+      }
+      throw err;
+    }
+  }
+}
 const cleanOut = (list) =>
   list.map(({ category_raw, needs_review, confidence, ...keep }) => keep);
 
@@ -323,11 +362,12 @@ async function publish() {
     )
       return set("#publishStatus", "Publish cancelled.");
     const merged = [...byId.values()];
-    await putLive(
+    await putWithRetry(
       c,
       merged,
-      sha,
       `data: add/update ${DRAFT.length} question(s) via admin`,
+      sha,
+      "#publishStatus",
     );
     merged.forEach((q) => EXISTING_IDS.add(q.id));
     DRAFT = [];
@@ -370,11 +410,12 @@ async function saveChanges() {
   set("#saveStatus", "Saving…");
   try {
     const { sha } = await getLive(c); // freshest sha to avoid conflicts
-    await putLive(
+    await putWithRetry(
       c,
       cleanOut(PUB),
-      sha,
       `data: edit/delete via admin (${PUB.length} remain)`,
+      sha,
+      "#saveStatus",
     );
     EXISTING_IDS = new Set(PUB.map((q) => q.id));
     PUB_SHA = sha;

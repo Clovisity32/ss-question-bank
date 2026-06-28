@@ -6,6 +6,10 @@ Topic/
 # Pipeline intermediate output (pre-review)
 site/data/questions.draft.json
 
+# Node (jsdom test tooling)
+node_modules/
+package-lock.json
+
 # Python
 .venv/
 __pycache__/

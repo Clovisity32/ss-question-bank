@@ -1,0 +1,11 @@
+{
+  "name": "ss-question-bank",
+  "private": true,
+  "description": "Dev tooling + jsdom regression tests for the static admin/site JS.",
+  "scripts": {
+    "test": "node tests/publish-retry.test.js && node tests/clear-draft.test.js"
+  },
+  "devDependencies": {
+    "jsdom": "^24.0.0"
+  }
+}

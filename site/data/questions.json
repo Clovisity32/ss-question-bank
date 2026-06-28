@@ -294,5 +294,37 @@
     "issue": 2,
     "chapter": 6,
     "chapter_title": "Experiences and effects of living in a diverse society"
+  },
+  {
+    "id": "bowen-sec-2025-q6",
+    "school": "Bowen Sec",
+    "year": 2025,
+    "paper": "Prelim 4E5N",
+    "question_number": 6,
+    "context": "6) Extract 1 suggests that scams have been increasing in Singapore.",
+    "stem": "In your opinion, what important messages would you share with Singaporeans to reduce scams in Singapore? Explain your answer with reference to two messages. [7]",
+    "marks": 7,
+    "source_file": "Sec 4E5N Prelims 2025 QP_Final.docx",
+    "bank": "Q6",
+    "category": "messages",
+    "issue": null,
+    "chapter": null,
+    "chapter_title": null
+  },
+  {
+    "id": "bowen-sec-2025-q7",
+    "school": "Bowen Sec",
+    "year": 2025,
+    "paper": "Prelim 4E5N",
+    "question_number": 7,
+    "context": "7) Extracts 2 and 3 discuss the challenges caused by differing needs and unequal sharing of costs in deciding what is good for society.",
+    "stem": "Do you think differing needs is a more challenging factor than unequal sharing of costs in deciding what is good for society? Explain your answer. [8]",
+    "marks": 8,
+    "source_file": "Sec 4E5N Prelims 2025 QP_Final.docx",
+    "bank": "Q7",
+    "category": null,
+    "issue": 1,
+    "chapter": 3,
+    "chapter_title": "How do we decide what is good for society? (principles of governance)"
   }
 ]

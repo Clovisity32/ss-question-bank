@@ -262,5 +262,37 @@
     "issue": 1,
     "chapter": 2,
     "chapter_title": "Functions and roles of government"
+  },
+  {
+    "id": "bendemeer-sec-2025-q6",
+    "school": "Bendemeer Sec",
+    "year": 2025,
+    "paper": "Prelim 4E5N",
+    "question_number": 6,
+    "context": "Extract 1 demonstrates an effort made to improve the education system to make it more inclusive.",
+    "stem": "In your opinion, what can be done to make Singapore a more inclusive society? Explain your answer with reference to two ways. [7]",
+    "marks": 7,
+    "source_file": "BDMS 4E5N PRELIMS SS 2025.docx",
+    "bank": "Q6",
+    "category": "strategies",
+    "issue": null,
+    "chapter": null,
+    "chapter_title": null
+  },
+  {
+    "id": "bdms-2025-q7",
+    "school": "BDMS",
+    "year": 2025,
+    "paper": "Prelim 4E5N",
+    "question_number": 7,
+    "context": "Extract 2 and Extract 3 show living in a diverse society can result in both positive and negative experiences.",
+    "stem": "Do you think the advantages of living in a diverse society is more significant than its disadvantages? Explain your answer. [8]",
+    "marks": 8,
+    "source_file": "BDMS 4E5N PRELIMS SS 2025.docx",
+    "bank": "Q7",
+    "category": null,
+    "issue": 2,
+    "chapter": 6,
+    "chapter_title": "Experiences and effects of living in a diverse society"
   }
 ]

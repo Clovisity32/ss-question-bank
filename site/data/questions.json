@@ -232,5 +232,37 @@
     "issue": null,
     "chapter": null,
     "chapter_title": null
+  },
+  {
+    "id": "bedok-green-null-q6",
+    "school": "Bedok Green",
+    "year": null,
+    "paper": "Prelim 4E",
+    "question_number": 6,
+    "context": "Extract 1 shows that meritocracy will continue to be an important principle that guides the development of Singapore.",
+    "stem": "In your opinion, why is it important for Singapore to practice meritocracy? Explain your answer with two reasons. [7]",
+    "marks": 7,
+    "source_file": "4E Prelim QP.docx",
+    "bank": "Q6",
+    "category": "reasons",
+    "issue": null,
+    "chapter": null,
+    "chapter_title": null
+  },
+  {
+    "id": "bedok-green-null-q7",
+    "school": "Bedok Green",
+    "year": null,
+    "paper": "Prelim 4E",
+    "question_number": 7,
+    "context": "Extracts 2 and 3 are about the roles of government for the benefit of society through ensuring the economic and social well-being of citizens and promoting and protecting the country's national interest. For the benefit of society,",
+    "stem": "do you think it is more important for the government to ensure the economic and social well-being of citizens or promote and protect the country's national interest? Explain your answer. [8]",
+    "marks": 8,
+    "source_file": "4E Prelim QP.docx",
+    "bank": "Q7",
+    "category": null,
+    "issue": 1,
+    "chapter": 2,
+    "chapter_title": "Functions and roles of government"
   }
 ]

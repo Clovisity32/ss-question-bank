@@ -14,7 +14,7 @@
     "issue": null,
     "chapter": null,
     "chapter_title": null,
-    "confidence": 1.0
+    "confidence": 1
   },
   {
     "id": "acs-br-2025-q7",
@@ -31,7 +31,7 @@
     "issue": 1,
     "chapter": 3,
     "chapter_title": "How do we decide what is good for society? (principles of governance)",
-    "confidence": 1.0
+    "confidence": 1
   },
   {
     "id": "anderson-2025-q6",
@@ -48,7 +48,7 @@
     "issue": null,
     "chapter": null,
     "chapter_title": null,
-    "confidence": 1.0
+    "confidence": 1
   },
   {
     "id": "anderson-2025-q7",
@@ -65,7 +65,7 @@
     "issue": 1,
     "chapter": 4,
     "chapter_title": "How can we work together for the good of society?",
-    "confidence": 1.0
+    "confidence": 1
   },
   {
     "id": "ahmad-ibrahim-2025-q6",
@@ -82,7 +82,7 @@
     "issue": null,
     "chapter": null,
     "chapter_title": null,
-    "confidence": 1.0
+    "confidence": 1
   },
   {
     "id": "ahmad-ibrahim-2025-q7",
@@ -99,7 +99,7 @@
     "issue": 2,
     "chapter": 6,
     "chapter_title": "Experiences and effects of living in a diverse society",
-    "confidence": 1.0
+    "confidence": 1
   },
   {
     "id": "ang-mo-kio-2025-q6",
@@ -116,7 +116,7 @@
     "issue": null,
     "chapter": null,
     "chapter_title": null,
-    "confidence": 1.0
+    "confidence": 1
   },
   {
     "id": "ang-mo-kio-2025-q7",
@@ -133,7 +133,7 @@
     "issue": 2,
     "chapter": 6,
     "chapter_title": "Experiences and effects of living in a diverse society",
-    "confidence": 1.0
+    "confidence": 1
   },
   {
     "id": "bedok-south-2025-q6",
@@ -150,7 +150,7 @@
     "issue": null,
     "chapter": null,
     "chapter_title": null,
-    "confidence": 1.0
+    "confidence": 1
   },
   {
     "id": "bedok-south-2025-q7",
@@ -178,13 +178,12 @@
     "context": "Extract 1 states an example of how the Singapore government strengthens citizens' sense of belonging.",
     "stem": "In your opinion, how can Singapore foster a strong sense of belonging to Singapore in Singaporean youths? Explain your answer with reference to two ways. [7]",
     "marks": 7,
-    "source_file": "Question Paper/v1_2025_BSS_4E_SS_Prelim_QP.docx",
+    "source_file": "v1_2025_BSS_4E_SS_Prelim_QP.docx",
     "bank": "Q6",
     "category": "strategies",
     "issue": null,
     "chapter": null,
-    "chapter_title": null,
-    "confidence": 1.0
+    "chapter_title": null
   },
   {
     "id": "bartley-2025-q7",
@@ -195,12 +194,11 @@
     "context": "Extracts 2 and 3 reflect on how managing trade-offs and governing with guiding principles help in making decisions for the good of society.",
     "stem": "Do you think managing trade-offs is more important than governance shaped by guiding principles in deciding what is good for society? [8]",
     "marks": 8,
-    "source_file": "Question Paper/v1_2025_BSS_4E_SS_Prelim_QP.docx",
+    "source_file": "v1_2025_BSS_4E_SS_Prelim_QP.docx",
     "bank": "Q7",
     "category": null,
     "issue": 1,
     "chapter": 3,
-    "chapter_title": "How do we decide what is good for society? (principles of governance)",
-    "confidence": 1.0
+    "chapter_title": "How do we decide what is good for society? (principles of governance)"
   }
 ]
